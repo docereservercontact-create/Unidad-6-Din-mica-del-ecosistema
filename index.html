@@ -1,0 +1,179 @@
+```html id="ecoexv1"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Examen Dinámica del Ecosistema</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    color: #1b5e20;
+    text-align: center;
+}
+
+.container {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #2e7d32;
+}
+
+input {
+    padding: 10px;
+    width: 80%;
+    border-radius: 8px;
+    border: 1px solid #a5d6a7;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #43a047;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #2e7d32;
+}
+
+.question {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.timer {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #1b5e20;
+}
+
+.hidden { display:none; }
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🌿 Examen: Dinámica del Ecosistema</h1>
+
+<div id="inicio">
+<input type="text" id="nombre" placeholder="Nombre"><br><br>
+<input type="text" id="cuenta" placeholder="Número de cuenta"><br><br>
+<button onclick="iniciar()">Comenzar</button>
+</div>
+
+<div id="quiz" class="hidden">
+<div class="timer" id="timer">01:05</div>
+<form id="formulario"></form>
+</div>
+
+<div id="resultado" class="hidden">
+<h2>Resultado</h2>
+<p id="calificacion"></p>
+<button onclick="descargarPDF()">Descargar PDF</button>
+</div>
+
+</div>
+
+<script>
+const preguntas = [
+{q:"Una cadena alimenticia es:",o:["Relación social","Secuencia de alimentación","Ciclo químico","Competencia"],a:1},
+{q:"El primer nivel trófico es:",o:["Consumidores","Productores","Descomponedores","Depredadores"],a:1},
+{q:"Las tramas alimenticias son:",o:["Lineales","Aisladas","Interconectadas","Simples"],a:2},
+{q:"La energía proviene principalmente de:",o:["Agua","Suelo","Sol","Aire"],a:2},
+{q:"Regla del 10% indica:",o:["Más energía","Menos energía","Igual energía","Sin energía"],a:1},
+{q:"Un consumidor primario es:",o:["Carnívoro","Herbívoro","Descomponedor","Productor"],a:1},
+{q:"Un consumidor terciario es:",o:["Planta","Depredador","Hongo","Alga"],a:1},
+{q:"Descomponedores hacen:",o:["Fotosíntesis","Reciclaje","Depredación","Mutación"],a:1},
+{q:"Red alimenticia representa:",o:["Una cadena","Varias cadenas","Un ciclo","Una especie"],a:1},
+{q:"Energía se pierde como:",o:["Agua","Calor","Aire","Minerales"],a:1},
+
+{q:"Ciclo biogeoquímico es:",o:["Flujo energía","Reciclaje materia","Mutación","Competencia"],a:1},
+{q:"Evaporación pertenece al:",o:["Carbono","Agua","Nitrógeno","Oxígeno"],a:1},
+{q:"CO2 es parte del ciclo:",o:["Agua","Carbono","Nitrógeno","Fósforo"],a:1},
+{q:"El nitrógeno es esencial para:",o:["Agua","Proteínas","Luz","Calor"],a:1},
+{q:"Bacterias fijan:",o:["Carbono","Nitrógeno","Agua","Oxígeno"],a:1},
+{q:"Fotosíntesis usa:",o:["CO2","O2","N2","H2"],a:0},
+{q:"Respiración libera:",o:["CO2","O2","N2","H2"],a:0},
+{q:"Ciclo del agua incluye:",o:["Mutación","Precipitación","Clonación","Evolución"],a:1},
+{q:"Materia en ecosistema:",o:["Se pierde","Se recicla","Se crea","Se destruye"],a:1},
+{q:"Ciclos conectan:",o:["Solo vivos","Vivos y ambiente","Solo clima","Solo suelo"],a:1},
+
+{q:"Relaciones intraespecíficas son:",o:["Distintas especies","Misma especie","Ambiente","Clima"],a:1},
+{q:"Relaciones interespecíficas:",o:["Misma especie","Diferentes especies","Clima","Ambiente"],a:1},
+{q:"Competencia ocurre por:",o:["Energía","Recursos","Clima","Mutación"],a:1},
+{q:"Depredación implica:",o:["Ayuda","Consumo","Neutralidad","Cooperación"],a:1},
+{q:"Mutualismo beneficia a:",o:["Uno","Ambos","Ninguno","Depredador"],a:1},
+{q:"Parasitismo afecta a:",o:["Ambos","Uno negativamente","Nadie","Plantas"],a:1},
+{q:"Comensalismo:",o:["Ambos pierden","Uno gana sin afectar","Depredación","Competencia"],a:1},
+{q:"Ejemplo intraespecífico:",o:["Depredación","Manada","Parásito","Mutualismo"],a:1},
+{q:"Ejemplo interespecífico:",o:["Grupo","Depredador-presa","Colonia","Familia"],a:1},
+{q:"Relaciones mantienen:",o:["Desequilibrio","Equilibrio","Caos","Mutación"],a:1}
+];
+
+let actual=0,respuestas=[],tiempo=65,intervalo;
+
+function iniciar(){
+document.getElementById("inicio").classList.add("hidden");
+document.getElementById("quiz").classList.remove("hidden");
+mostrar();
+}
+
+function mostrar(){
+if(actual>=preguntas.length){fin();return;}
+let p=preguntas[actual];
+let html="<div class='question'><h3>"+(actual+1)+". "+p.q+"</h3>";
+p.o.forEach((op,i)=>{
+html+=`<label><input type="radio" name="r" value="${i}"> ${op}</label><br>`;
+});
+html+="<button type='button' onclick='sig()'>Siguiente</button></div>";
+document.getElementById("formulario").innerHTML=html;
+
+tiempo=65;
+clearInterval(intervalo);
+intervalo=setInterval(()=>{
+tiempo--;
+let m=Math.floor(tiempo/60),s=tiempo%60;
+document.getElementById("timer").innerText=
+(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+if(tiempo<=0) sig();
+},1000);
+}
+
+function sig(){
+let sel=document.querySelector('input[name="r"]:checked');
+respuestas.push(sel?parseInt(sel.value):-1);
+actual++;mostrar();
+}
+
+function fin(){
+clearInterval(intervalo);
+document.getElementById("quiz").classList.add("hidden");
+document.getElementById("resultado").classList.remove("hidden");
+
+let c=0;
+preguntas.forEach((p,i)=>{if(p.a===respuestas[i])c++;});
+let cal=(c/preguntas.length)*10;
+document.getElementById("calificacion").innerText=
+"Calificación: "+cal.toFixed(2)+" / 10";
+}
+
+function descargarPDF(){window.print();}
+</script>
+
+</body>
+</html>
+```
